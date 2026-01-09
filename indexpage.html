@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Fake News Checker — Home</title>
+  <style>
+    :root{
+      --bg1: #0f172a; --bg2: #0b2545;
+      --card: rgba(255,255,255,0.06);
+      --accent1: #7c6cff; --accent2: #6ee7ff;
+      --good: #16a34a; --bad:#ef4444; --muted:#9aa7bf;
+      --radius:16px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{
+      height:100%;
+      margin:0;
+      font-family:Inter,system-ui,Segoe UI,Roboto,Arial;
+      background:linear-gradient(-45deg,#0f172a,#0b2545,#112240,#1a2e4f);
+      background-size:400% 400%;
+      animation:gradientMove 15s ease infinite;
+      color:#e6eef8;
+      overflow-x:hidden;
+      cursor:none; 
+    }
+    .wrap{max-width:1100px;margin:28px auto;padding:20px;animation:fadeIn 1.2s ease}
+    header{display:flex;align-items:center;gap:14px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{
+      width:56px;height:56px;border-radius:12px;
+      background:linear-gradient(135deg,var(--accent1),var(--accent2));
+      display:grid;place-items:center;font-weight:800;color:#06283d;
+      box-shadow:0 0 20px rgba(124,108,255,0.7),0 0 40px rgba(110,231,255,0.6);
+      animation:shimmer 3s infinite linear;
+    }
+    h1{font-size:1.5rem;margin:0;animation:pulse 3s infinite}
+    .lead{color:var(--muted);margin-top:4px;font-size:.95rem}
+    main{display:grid;grid-template-columns:1fr;gap:18px;margin-top:18px}
+    @media(min-width:980px){main{grid-template-columns:1.05fr .65fr}}
+    .card{
+      background:rgba(255,255,255,0.03);border-radius:var(--radius);padding:18px;
+      border:1px solid rgba(255,255,255,0.04);
+      box-shadow:0 12px 30px rgba(2,6,23,0.35);
+      transition:transform .6s,box-shadow .6s;
+      animation:float 6s ease-in-out infinite;
+    }
+    .card:hover{
+      transform:translateY(-10px) scale(1.02);
+      box-shadow:0 18px 40px rgba(2,6,23,0.55),0 0 20px rgba(110,231,255,0.4);
+    }
+    label{display:block;font-weight:600;margin-bottom:8px}
+    input[type="text"], input[type="password"], textarea, select{
+      width:100%;padding:12px;border-radius:12px;
+      border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit;font-size:1rem;
+      transition:border .3s,box-shadow .3s;
+    }
+    input:focus, textarea:focus{
+      outline:none;border-color:var(--accent2);
+      box-shadow:0 0 20px rgba(110,231,255,0.7);
+    }
+    textarea{min-height:150px;resize:vertical}
+    .btn{
+      padding:10px 18px;border-radius:999px;border:none;cursor:pointer;font-weight:700;
+      background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#04213a;
+      box-shadow:0 0 15px rgba(124,108,255,0.7);
+      transition:transform .25s,box-shadow .25s;
+      position:relative;overflow:hidden;
+    }
+    .btn:hover{
+      transform:scale(1.05);
+      box-shadow:0 0 30px rgba(124,108,255,1),0 0 50px rgba(110,231,255,0.8);
+    }
+    .btn:active{transform:scale(.97)}
+    .btn::after{
+      content:"";position:absolute;top:0;left:-75%;
+      width:50%;height:100%;background:rgba(255,255,255,0.4);
+      transform:skewX(-20deg);transition:0.5s;
+    }
+    .btn:hover::after{left:125%}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.2);color:var(--muted)}
+    .btn.ghost:hover{color:var(--accent2);border-color:var(--accent2)}
+    .chip{display:inline-block;padding:8px 12px;border-radius:999px;font-weight:700;transition:transform .3s;margin-top:10px;}
+    .chip:hover{transform:scale(1.1)}
+    .chip.real{background:rgba(22,163,74,0.12);color:var(--good);border:1px solid rgba(22,163,74,0.25)}
+    .chip.fake{background:rgba(239,68,68,0.12);color:var(--bad);border:1px solid rgba(239,68,68,0.25)}
+    .chip.unknown{background:rgba(255,255,255,0.03);color:var(--muted);border:1px solid rgba(255,255,255,0.03)}
+    .info h3{margin:0 0 8px 0;position:relative}
+    .info h3::after{
+      content:"";display:block;width:40px;height:3px;
+      background:linear-gradient(90deg,var(--accent1),var(--accent2));
+      border-radius:2px;margin-top:4px;animation:grow 1.5s infinite alternate;
+    }
+    ul{margin:10px 0 0 18px;color:var(--muted);line-height:1.6}
+    footer{text-align:center;color:var(--muted);margin-top:16px;font-size:.9rem;opacity:.85;transition:opacity .3s}
+    footer:hover{opacity:1}
+    .hint{color:var(--muted);font-size:.9rem;margin-top:8px}
+    a.link{color:var(--accent2);text-decoration:none;font-weight:700;transition:color .3s}
+    a.link:hover{color:var(--accent1)}
+    /* Admin Dashboard styles */
+    .admin-dashboard{margin-top:18px;}
+    .admin-dashboard h3{margin-top:0;}
+    .news-list{
+        max-height: 250px;
+        overflow-y: auto;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 8px;
+        padding: 10px;
+        background: rgba(0,0,0,0.1);
+        margin-bottom: 12px;
+    }
+    .news-item{
+        padding: 8px;
+        margin-bottom: 5px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+      }
+    .news-item button{
+        margin-left:6px;
+        padding:4px 8px;
+        border-radius:4px;
+        border:none;
+        cursor:pointer;
+        font-weight:600;
+    }
+    .news-item .delete-btn{background: var(--bad); color:white;}
+    .news-item .delete-btn:hover{background:#c53030;}
+    .news-item .edit-btn{background:var(--accent1); color:#04213a;}
+    .news-item .edit-btn:hover{background:var(--accent2);}
+    /* Cursor */
+    .cursor{
+      position:fixed;top:0;left:0;width:28px;height:28px;border-radius:50%;
+      background:radial-gradient(circle,var(--accent2),transparent 70%);
+      pointer-events:none;transform:translate(-50%,-50%);
+      mix-blend-mode:screen;z-index:9999;
+      transition:transform .12s ease-out,width .25s,height .25s;
+    }
+    .cursor.click{width:60px;height:60px;opacity:0.6;transition:width .25s,height .25s,opacity .4s}
+    .trail{
+      position:fixed;width:8px;height:8px;border-radius:50%;
+      background:rgba(124,108,255,0.7);
+      pointer-events:none;z-index:9990;mix-blend-mode:screen;
+      animation:fadeTrail 1s forwards;
+    }
+    @keyframes fadeTrail{to{opacity:0;transform:scale(0.5)}}
+    @keyframes gradientMove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes shimmer{0%{background-position:-200px 0}100%{background-position:200px 0}}
+    @keyframes pulse{0%,100%{text-shadow:0 0 10px rgba(124,108,255,0.8)}50%{text-shadow:0 0 20px rgba(110,231,255,1)}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    @keyframes grow{from{width:20px}to{width:60px}}
+  </style>
+</head>
+<body>
+  <div class="cursor"></div> 
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">FN</div>
+        <div>
+          <h1>Fake News Checker</h1>
+          <div class="lead">Admin-updated database • Public checker • Simple similarity-based detection</div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="card" aria-labelledby="home-title">
+        <h2 id="home-title">Public: Check a News Item</h2>
+        <p class="hint">Paste the news text and click <strong>Check</strong>. Results compare against verified news added by admin.</p>
+
+        <form id="publicCheckForm" style="margin-top:12px">
+          <label for="publicText">News content</label>
+          <textarea id="publicText" name="newsText" placeholder="Paste headline or article..." required></textarea>
+          <div style="display:flex;gap:10px;margin-top:12px;align-items:center">
+            <button class="btn" type="submit">Check</button>
+            <button class="btn ghost" type="reset">Clear</button>
+            <small style="margin-left:auto">No login required • Instant check</small>
+          </div>
+          <div id="checkResult"></div>
+        </form>
+
+        <hr style="margin:16px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
+
+        <div id="adminLoginSection">
+          <h3 style="margin-top:0">Admin Sign In</h3>
+          <p class="hint">Only admin can add or edit the verified news database.</p>
+          <form id="adminLoginForm" style="margin-top:12px">
+            <label for="adminId">Admin ID</label>
+            <input id="adminId" name="adminId" type="text" placeholder="admin" required>
+
+            <label for="adminPw" style="margin-top:10px">Password</label>
+            <input id="adminPw" name="adminPw" type="password" placeholder="password" required>
+
+            <div style="display:flex;gap:10px;margin-top:12px;align-items:center">
+              <button class="btn" type="submit">Sign In</button>
+              <small id="loginHint" style="margin-left:auto">Demo credentials: <strong>admin / password123</strong></small>
+            </div>
+          </form>
+        </div>
+
+        <div id="adminDashboard" class="admin-dashboard" style="display: none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <h3>Admin Dashboard</h3>
+            <button class="btn ghost" id="adminLogoutBtn" type="button">Sign Out</button>
+          </div>
+
+          <h4>Add New Verified News</h4>
+          <form id="addNewsForm" style="margin-top:12px">
+            <label for="newNewsText">News Text to Add</label>
+            <textarea id="newNewsText" placeholder="Paste the full, verified news article here..." required></textarea>
+            <div style="margin-top:12px">
+              <button class="btn" type="submit">Add News</button>
+            </div>
+          </form>
+
+          <hr style="margin:16px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
+
+          <h4>Verified News Database (<span id="newsCount">0</span> items)</h4>
+          <div class="news-list" id="verifiedNewsList"></div>
+        </div>
+      </section>
+
+      <aside class="card info" aria-labelledby="info-title">
+        <h3 id="info-title">How it works (admin → public)</h3>
+        <ul>
+          <li>Admin logs in and adds verified (real) news entries.</li>
+          <li>Public users paste news text to verify — no login required.</li>
+          <li>System compares public text with admin news using simple word similarity (Jaccard Index).</li>
+          <li>If similarity is ≥ 0.35 → shows <span class="chip real">Real</span>, else <span class="chip fake">Fake</span>.</li>
+        </ul>
+
+        <h3 style="margin-top:14px">Admin features</h3>
+        <ul>
+          <li>Add new verified news</li>
+          <li>Edit existing verified news</li>
+          <li>Delete existing verified news</li>
+          <li>Simple session-based login/logout</li>
+        </ul>
+
+        <p style="margin-top:12px" class="hint">This is a fully client-side demo using JavaScript for the database and logic. Refreshing the page will reset the news database.</p>
+      </aside>
+    </main>
+
+    <footer>Built for demo & learning • Place <code>index.html</code> at web root and deploy backend servlet</footer>
+  </div>
+
+  <script>
+    // ----------------------------------------
+    // 1. SIMULATED DATABASE & JACCARD SIMILARITY
+    // ----------------------------------------
+    let verifiedNews = [
+      "India adds record 31.25 GW non-fossil energy capacity this year, led by solar — biggest ever annual clean-energy addition.",
+      "Fire at popular nightclub in Goa kills 25 people, triggering nationwide safety outrage.",
+      "IndiGo flight disruptions continue — cancellations enter 6th day as operations struggle amid regulatory changes.",
+      "Adani Group plans a $15 billion airport-expansion push across India by 2030.",
+      "Virat Kohli credits “most satisfying” series as he rediscovers his peak form in India’s recent win over South Africa.",
+      "Narendra Modi says India is witnessing a “psychological renaissance,” shedding old mindsets as the country emerges as a global growth engine.",
+      "Fire at a night‑club in North Goa kills 25 people — the blaze at Birch by Romeo Lane triggers nationwide safety outrage and a magisterial probe.",
+      "Air India and associated airlines announce fare caps on domestic flights to ease burden on stranded travellers amid aviation disruption.",
+      "India’s DRDO transfers seven indigenous defence technologies to the armed forces.",
+      "Major Accident In Karur By A Younger",
+
+    ];
+    const SIMILARITY_THRESHOLD = 0.35;
+
+    function tokenize(text) {
+      return new Set(text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/\s+/).filter(Boolean));
+    }
+
+    function calculateJaccardSimilarity(text1, text2) {
+      const setA = tokenize(text1);
+      const setB = tokenize(text2);
+      let intersectionSize = 0;
+      for (const word of setA) if (setB.has(word)) intersectionSize++;
+      const unionSize = setA.size + setB.size - intersectionSize;
+      return unionSize === 0 ? 0 : intersectionSize / unionSize;
+    }
+
+    // ----------------------------------------
+    // 2. PUBLIC CHECKER
+    // ----------------------------------------
+    const publicCheckForm = document.getElementById('publicCheckForm');
+    const publicTextarea = document.getElementById('publicText');
+    const checkResultDiv = document.getElementById('checkResult');
+
+    publicCheckForm.addEventListener('submit', e => {
+      e.preventDefault();
+      checkResultDiv.innerHTML = '';
+      const inputText = publicTextarea.value.trim();
+      if (inputText.length < 10) {
+        checkResultDiv.innerHTML = `<p class="hint" style="color:var(--bad)">Please enter more text for a meaningful check.</p>`;
+        return;
+      }
+      let maxSimilarity = 0, matchedNews = '';
+      for (const verifiedItem of verifiedNews) {
+        const similarity = calculateJaccardSimilarity(inputText, verifiedItem);
+        if (similarity > maxSimilarity) { maxSimilarity = similarity; matchedNews = verifiedItem; }
+      }
+      const scorePercent = (maxSimilarity*100).toFixed(2);
+      if(maxSimilarity >= SIMILARITY_THRESHOLD){
+        checkResultDiv.innerHTML = `<div class="chip real">REAL NEWS</div><p class="hint" style="margin-top:5px; color:var(--good)">Strong match found! Similarity Score: ${scorePercent}%</p><p class="hint">Matched Verified News: "${matchedNews.substring(0, 80)}..."</p>`;
+      } else {
+        checkResultDiv.innerHTML = `<div class="chip fake">FAKE NEWS (or UNVERIFIED)</div><p class="hint" style="margin-top:5px; color:var(--bad)">No strong match found in the verified database. Max Similarity: ${scorePercent}%</p><p class="hint">Try adding this news item as 'real' in the admin panel.</p>`;
+      }
+    });
+
+    // ----------------------------------------
+    // 3. ADMIN PANEL: LOGIN, ADD, EDIT, DELETE
+    // ----------------------------------------
+    const ADMIN_ID = 'admin', ADMIN_PW='password123';
+    let isAdminLoggedIn = false;
+    const adminLoginSection = document.getElementById('adminLoginSection');
+    const adminLoginForm = document.getElementById('adminLoginForm');
+    const adminDashboard = document.getElementById('adminDashboard');
+    const adminLogoutBtn = document.getElementById('adminLogoutBtn');
+    const loginHint = document.getElementById('loginHint');
+    const addNewsForm = document.getElementById('addNewsForm');
+    const newNewsTextarea = document.getElementById('newNewsText');
+    const verifiedNewsList = document.getElementById('verifiedNewsList');
+    const newsCountSpan = document.getElementById('newsCount');
+
+    function updateAdminUI() {
+      if(isAdminLoggedIn){
+        adminLoginSection.style.display='none';
+        adminDashboard.style.display='block';
+        renderVerifiedNewsList();
+      } else {
+        adminLoginSection.style.display='block';
+        adminDashboard.style.display='none';
+      }
+    }
+
+    function renderVerifiedNewsList(){
+      verifiedNewsList.innerHTML='';
+      newsCountSpan.textContent = verifiedNews.length;
+      if(verifiedNews.length===0){
+        verifiedNewsList.innerHTML = `<p class="hint" style="text-align:center; margin:10px 0;">The database is currently empty.</p>`;
+        return;
+      }
+      verifiedNews.forEach((newsItem, index)=>{
+        const itemDiv = document.createElement('div');
+        itemDiv.className='news-item';
+        itemDiv.innerHTML = `
+          <span title="${newsItem}">${newsItem.substring(0,65)}...</span>
+          <div>
+            <button class="edit-btn" data-index="${index}">Edit</button>
+            <button class="delete-btn" data-index="${index}">Delete</button>
+          </div>`;
+        verifiedNewsList.appendChild(itemDiv);
+      });
+
+      // Event Listeners
+      verifiedNewsList.querySelectorAll('.delete-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const index=parseInt(btn.getAttribute('data-index'));
+          if(confirm(`Are you sure you want to delete this verified news item:\n"${verifiedNews[index].substring(0,50)}..."?`)){
+            verifiedNews.splice(index,1);
+            renderVerifiedNewsList();
+          }
+        });
+      });
+
+      verifiedNewsList.querySelectorAll('.edit-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const index=parseInt(btn.getAttribute('data-index'));
+          const newText = prompt("Edit the news text:", verifiedNews[index]);
+          if(newText!==null && newText.trim()!==''){
+            verifiedNews[index]=newText.trim();
+            renderVerifiedNewsList();
+          }
+        });
+      });
+    }
+
+    adminLoginForm.addEventListener('submit', e=>{
+      e.preventDefault();
+      const adminId = document.getElementById('adminId').value;
+      const adminPw = document.getElementById('adminPw').value;
+      if(adminId===ADMIN_ID && adminPw===ADMIN_PW){
+        isAdminLoggedIn=true;
+        loginHint.innerHTML='<span style="color:var(--good)">Login Successful!</span>';
+        updateAdminUI();
+      } else{
+        loginHint.innerHTML='<span style="color:var(--bad)">Invalid Credentials.</span>';
+      }
+    });
+
+    adminLogoutBtn.addEventListener('click', ()=>{
+      isAdminLoggedIn=false;
+      loginHint.innerHTML='Demo credentials: <strong>admin / password123</strong>';
+      updateAdminUI();
+    });
+
+    addNewsForm.addEventListener('submit', e=>{
+      e.preventDefault();
+      const newText = newNewsTextarea.value.trim();
+      if(newText){
+        verifiedNews.push(newText);
+        newNewsTextarea.value='';
+        alert('News successfully added!');
+        renderVerifiedNewsList();
+      }
+    });
+
+    // ----------------------------------------
+    // 4. INITIALIZATION & CURSOR
+    // ----------------------------------------
+    document.addEventListener('DOMContentLoaded', ()=>{ updateAdminUI(); });
+    const cursor = document.querySelector('.cursor');
+    document.addEventListener('mousemove', e=>{
+      cursor.style.top=e.clientY+'px';
+      cursor.style.left=e.clientX+'px';
+      const trail=document.createElement('span');
+      trail.className='trail';
+      trail.style.left=e.clientX+'px';
+      trail.style.top=e.clientY+'px';
+      document.body.appendChild(trail);
+      setTimeout(()=>trail.remove(),1000);
+    });
+    document.addEventListener('mousedown', ()=>{ cursor.classList.add('click'); setTimeout(()=>cursor.classList.remove('click'),200); });
+  </script>
+</body>
+</html>
